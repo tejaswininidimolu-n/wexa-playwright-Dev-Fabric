@@ -1,0 +1,16 @@
+# Playwright dependencies and generated output.
+node_modules/
+playwright-report/
+test-results/
+blob-report/
+
+# Local environment files may contain secrets.
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files.
+.idea/
+.vscode/
+.DS_Store
+

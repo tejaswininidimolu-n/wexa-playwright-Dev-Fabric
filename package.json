@@ -1,0 +1,24 @@
+{
+  "name": "wexa-fabric-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright TypeScript automation framework for Wexa Fabric.",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:functional": "playwright test playwright/tests/functional",
+    "test:regression": "playwright test --grep @regression",
+    "test:e2e": "playwright test playwright/tests/e2e",
+    "test:api": "playwright test playwright/tests/api",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest",
+    "@types/node": "latest",
+    "dotenv": "^17.4.2",
+    "typescript": "latest"
+  }
+}
