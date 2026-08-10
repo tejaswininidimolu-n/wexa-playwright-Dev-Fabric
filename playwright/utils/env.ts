@@ -9,3 +9,7 @@ export function requireEnv(name: string): string {
   return value;
 }
 
+/** The single application URL used by UI and API tests. */
+export function getFabricBaseUrl(): string {
+  return process.env.FABRIC_BASE_URL ?? 'http://localhost:3000';
+}

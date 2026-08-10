@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
+import { getFabricBaseUrl } from './playwright/utils/env';
+
 // Load local environment values without committing credentials or URLs.
 dotenv.config();
 
@@ -12,7 +14,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { open: 'never' }], ['list']],
   use: {
-    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
+    baseURL: getFabricBaseUrl(),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -25,4 +27,3 @@ export default defineConfig({
   ],
   outputDir: 'test-results',
 });
-

@@ -36,13 +36,10 @@ export class SignupPage extends BasePage {
     this.organizationNameInput = page.getByRole('textbox', {
       name: 'Organization Name',
     });
-    this.emailInput = page.getByRole('textbox', { name: 'Email' });
-    this.passwordInput = page.getByRole('textbox', {
-      name: 'Password',
+    this.emailInput = page.getByLabel('Email', { exact: true });
+    this.passwordInput = page.getByLabel('Password', { exact: true });
+    this.confirmPasswordInput = page.getByLabel('Confirm Password', {
       exact: true,
-    });
-    this.confirmPasswordInput = page.getByRole('textbox', {
-      name: 'Confirm Password',
     });
     this.createAccountButton = page.getByRole('button', {
       name: 'Create Account',
@@ -56,8 +53,8 @@ export class SignupPage extends BasePage {
   }
 
   /** Opens the login page used as the entry point to the signup workflow. */
-  async openLoginPage(loginUrl: string): Promise<void> {
-    await this.page.goto(loginUrl);
+  async openLoginPage(): Promise<void> {
+    await this.page.goto('/login');
   }
 
   /** Verifies that the signup entry point is available to the user. */

@@ -1,8 +1,9 @@
 import { expect, test } from '../../fixtures/base.fixture';
 import { loginData } from '../../test-data/loginData';
 import { createSignupData } from '../../test-data/signupData';
+import { getFabricBaseUrl } from '../../utils/env';
 
-const applicationUrl = process.env.BASE_URL ?? 'http://dev.fabric.wexa.ai';
+const applicationUrl = getFabricBaseUrl();
 const loginEndpoint = new URL('/identity-api/users/login', applicationUrl).toString();
 const signupEndpoint = new URL('/identity-api/users/signup', applicationUrl).toString();
 

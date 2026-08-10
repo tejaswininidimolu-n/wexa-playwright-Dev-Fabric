@@ -7,7 +7,6 @@ import { BasePage } from './base.page';
  * feature tests such as Agents, Knowledge Base, Executions, and Connectors.
  */
 export class LoginPage extends BasePage {
-  private readonly loginUrl: string;
   private readonly emailInput: Locator;
   private readonly passwordInput: Locator;
   private readonly signInButton: Locator;
@@ -15,19 +14,15 @@ export class LoginPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.loginUrl = new URL(
-      '/login',
-      process.env.BASE_URL ?? 'http://dev.fabric.wexa.ai',
-    ).toString();
-    this.emailInput = page.getByRole('textbox', { name: 'Email' });
-    this.passwordInput = page.getByRole('textbox', { name: 'Password' });
+    this.emailInput = page.getByLabel('Email', { exact: true });
+    this.passwordInput = page.getByLabel('Password', { exact: true });
     this.signInButton = page.getByRole('button', { name: 'Sign In' });
     this.errorMessage = page.locator('[class*="bg-cs-error-bg"]');
   }
 
   /** Opens the login page at the supplied environment URL. */
-  async open(loginUrl: string): Promise<void> {
-    await this.page.goto(loginUrl);
+  async open(): Promise<void> {
+    await this.page.goto('/login');
   }
 
   /** Verifies that the login form is visible and ready for interaction. */
@@ -48,7 +43,7 @@ export class LoginPage extends BasePage {
 
   /** Submits credentials without assuming authentication will succeed. */
   async attemptLogin(email: string, password: string): Promise<void> {
-    await this.open(this.loginUrl);
+    await this.open();
     await this.expectLoginFormVisible();
     await this.emailInput.click();
     await this.emailInput.fill(email);
@@ -73,7 +68,7 @@ export class LoginPage extends BasePage {
 
   /** Submits an untouched form so browser-required validation can run. */
   async submitEmptyForm(): Promise<void> {
-    await this.open(this.loginUrl);
+    await this.open();
     await this.expectLoginFormVisible();
     await this.signInButton.click();
   }

@@ -2,7 +2,6 @@ import type { SignupDetails } from '../pages/SignupPage';
 
 /** Complete data set required by the signup and onboarding workflow. */
 export interface SignupTestData {
-  readonly loginUrl: string;
   readonly account: SignupDetails;
   readonly onboarding: {
     readonly departmentName: string;
@@ -26,7 +25,6 @@ export function createSignupData(
   accountOverrides: Partial<SignupDetails> = {},
 ): SignupTestData {
   return {
-    loginUrl: 'http://dev.fabric.wexa.ai/login',
     account: {
       firstName: 'Test',
       lastName: 'Dep',

@@ -5,14 +5,16 @@ import { createSignupData } from '../test-data/signupData';
 import { loginData } from '../test-data/loginData';
 
 test.describe('Signup', () => {
-  test('creates an account, department, and project @smoke @regression', async ({
+  test.describe.configure({ mode: 'serial' });
+
+  test('creates an account, department, and project @smoke @regression @stateful', async ({
     page,
   }) => {
     const signupPage = new SignupPage(page);
     const onboardingPage = new OnboardingPage(page);
     const signupData = createSignupData();
 
-    await signupPage.openLoginPage(signupData.loginUrl);
+    await signupPage.openLoginPage();
     await signupPage.expectSignupLinkVisible();
     await signupPage.openSignupForm();
     await signupPage.expectSignupFormVisible();
@@ -30,7 +32,7 @@ test.describe('Signup', () => {
     const signupPage = new SignupPage(page);
     const signupData = createSignupData({ confirmPassword: 'Different@123' });
 
-    await signupPage.openLoginPage(signupData.loginUrl);
+    await signupPage.openLoginPage();
     await signupPage.openSignupForm();
     await signupPage.fillSignupForm(signupData.account);
     await signupPage.createAccount();
@@ -41,7 +43,7 @@ test.describe('Signup', () => {
     const signupPage = new SignupPage(page);
     const signupData = createSignupData({ email: loginData.email });
 
-    await signupPage.openLoginPage(signupData.loginUrl);
+    await signupPage.openLoginPage();
     await signupPage.openSignupForm();
     await signupPage.fillSignupForm(signupData.account);
     await signupPage.createAccount();
@@ -52,7 +54,7 @@ test.describe('Signup', () => {
     const signupPage = new SignupPage(page);
     const signupData = createSignupData();
 
-    await signupPage.openLoginPage(signupData.loginUrl);
+    await signupPage.openLoginPage();
     await signupPage.openSignupForm();
     await signupPage.createAccount();
     await signupPage.expectRequiredFieldValidation();
@@ -62,7 +64,7 @@ test.describe('Signup', () => {
     const signupPage = new SignupPage(page);
     const signupData = createSignupData({ email: loginData.invalidEmail });
 
-    await signupPage.openLoginPage(signupData.loginUrl);
+    await signupPage.openLoginPage();
     await signupPage.openSignupForm();
     await signupPage.fillSignupForm(signupData.account);
     await signupPage.createAccount();
