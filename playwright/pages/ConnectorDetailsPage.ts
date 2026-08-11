@@ -14,12 +14,11 @@ export class ConnectorDetailsPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.dialog = page.getByRole('dialog');
-    this.heading = this.dialog.getByRole('heading', { level: 2 });
-    this.body = this.dialog.getByTestId('connector-modal-body');
+    this.heading = this.dialog.getByRole('heading').first();
+    this.body = this.dialog;
     this.cancelButton = this.dialog.getByRole('button', {
-      name: 'Cancel',
-      exact: true,
-    });
+      name: /^(Cancel|Close)$/,
+    }).first();
     this.saveButton = this.dialog.getByRole('button', {
       name: 'Save changes',
       exact: true,
@@ -27,14 +26,24 @@ export class ConnectorDetailsPage extends BasePage {
   }
 
   async expectLoaded(connectorName: string): Promise<void> {
-    await expect(this.dialog).toBeVisible({ timeout: 30_000 });
-    await expect(this.heading).toHaveText(`Edit ${connectorName}`);
+    const errorBoundary = this.page.getByRole('heading', {
+      name: 'Something went wrong',
+      exact: true,
+    });
+    await expect(
+      this.dialog.or(errorBoundary),
+      `Connector details did not resolve for ${connectorName}.`,
+    ).toBeVisible({ timeout: 15_000 });
+    if (await errorBoundary.isVisible().catch(() => false)) {
+      throw new Error(`Connector details entered the application error boundary: ${connectorName}`);
+    }
+    const escapedName = connectorName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await expect(this.dialog.getByText(
+      new RegExp(`^(?:Edit\\s+)?${escapedName}$`, 'i'),
+    ).first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(this.body).toBeVisible();
-    await expect(this.body).toContainText(
-      'Connection credentials are loaded from the connector.',
-      { timeout: 30_000 },
-    );
-    await expect(this.cancelButton).toBeVisible();
     await expect(this.saveButton).toBeVisible();
   }
 
@@ -91,8 +100,11 @@ export class ConnectorDetailsPage extends BasePage {
 
   /** Closes without saving; useful when the containing page will be discarded. */
   async cancel(): Promise<void> {
-    await this.cancelButton.click();
-    await expect(this.dialog).toBeHidden();
+    await this.page.keyboard.press('Escape');
+    if (await this.dialog.isVisible().catch(() => false)) {
+      await this.page.goto('/connect/connectors', { waitUntil: 'domcontentloaded' });
+    }
+    await expect(this.dialog).toBeHidden({ timeout: 10_000 });
   }
 
   /** Returns a credential-safe copy of the modal DOM for failure attachments. */

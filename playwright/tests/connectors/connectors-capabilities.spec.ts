@@ -21,11 +21,13 @@ function toCapabilities(
   }));
 }
 
-test.describe('Connector capability detection', () => {
+test.describe('Connector capability detection @functional', () => {
   test('inventories capabilities without executing them @regression', async ({
     page,
   }, testInfo) => {
-    test.setTimeout(120_000);
+    // Exhaustively reopening 11 connector dialogs is API-bound and exceeds the
+    // default budget when this spec shares the dev environment with other workers.
+    test.setTimeout(300_000);
 
     const connectorsPage = new ConnectorsPage(page);
     const detailsPage = new ConnectorDetailsPage(page);
@@ -36,11 +38,12 @@ test.describe('Connector capability detection', () => {
     const connectorNames = await connectorsPage.getConnectorNames();
     expect(connectorNames.length).toBeGreaterThan(0);
 
-    for (const connectorName of connectorNames) {
+    for (const [index, connectorName] of connectorNames.entries()) {
       let discoveredCapabilities: ConnectorCapability[] = [];
 
       try {
         await test.step(`Inventory connector: ${connectorName}`, async () => {
+          if (index > 0) await connectorsPage.reloadList();
           const cardActions = await connectorsPage.getAvailableActions(connectorName);
           const overflowActions =
             await connectorsPage.getOverflowActions(connectorName);
@@ -106,38 +109,42 @@ test.describe('Connector capability detection', () => {
             }`,
           );
 
-          await detailsPage.goBackToConnectors();
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         failures.push(`${connectorName}: ${message}`);
         const safeName = connectorName.replace(/[^a-z0-9_-]+/gi, '-');
 
-        await testInfo.attach(`capabilities-${safeName}-diagnostics`, {
-          body: JSON.stringify(
-            {
-              connectorName,
-              url: page.url(),
-              title: await page.title().catch(() => '<unavailable>'),
-              discoveredCapabilities,
-              modalDom: await detailsPage
-                .getDiagnosticDom()
-                .catch(() => '<details DOM unavailable>'),
-            },
-            null,
-            2,
-          ),
-          contentType: 'application/json',
-        });
-        await testInfo.attach(`capabilities-${safeName}-screenshot`, {
-          body: await page.screenshot({ fullPage: true }),
-          contentType: 'image/png',
-        });
+        if (!page.isClosed()) {
+          await testInfo.attach(`capabilities-${safeName}-diagnostics`, {
+            body: JSON.stringify(
+              {
+                connectorName,
+                url: page.url(),
+                title: await page.title().catch(() => '<unavailable>'),
+                discoveredCapabilities,
+                modalDom: await detailsPage
+                  .getDiagnosticDom()
+                  .catch(() => '<details DOM unavailable>'),
+              },
+              null,
+              2,
+            ),
+            contentType: 'application/json',
+          });
+          const screenshot = await page.screenshot({ fullPage: true }).catch(() => undefined);
+          if (screenshot) {
+            await testInfo.attach(`capabilities-${safeName}-screenshot`, {
+              body: screenshot,
+              contentType: 'image/png',
+            });
+          }
+        }
 
-        if (await detailsPage.isOpen().catch(() => false)) {
+        if (!page.isClosed() && await detailsPage.isOpen().catch(() => false)) {
           await detailsPage.goBackToConnectors().catch(() => undefined);
         }
-        if (!page.url().match(/\/connect\/connectors\/?$/)) {
+        if (!page.isClosed() && !page.url().match(/\/connect\/connectors\/?$/)) {
           await connectorsPage.goto().catch(() => undefined);
         }
       }

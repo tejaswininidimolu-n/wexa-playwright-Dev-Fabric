@@ -25,12 +25,13 @@ test.describe('Safe Agent regression @regression', () => {
     const { agentflows } = await api.getAgents();
     expect(agentflows.length).toBeGreaterThan(0);
     const agentsPage = new AgentsPage(page);
-    await agentsPage.waitForReady();
+    await agentsPage.goto();
     const initialCount = await agentsPage.getAgentCount();
     await agentsPage.search(agentflows[0].name);
     await agentsPage.selectTypeFilter(AGENT_TYPES[0]);
     await agentsPage.clearSearch();
     await agentsPage.selectTypeFilter('All');
+    await agentsPage.waitForAgentCount(initialCount);
     expect(await agentsPage.getAgentCount()).toBe(initialCount);
   });
 
@@ -50,7 +51,7 @@ test.describe('Safe Agent regression @regression', () => {
     const api = await AgentApi.fromAuthenticatedPage(page, request);
     const before = await api.getAgents();
     const agentsPage = new AgentsPage(page);
-    await agentsPage.waitForReady();
+    await agentsPage.goto();
     await agentsPage.openNewAgentChooser();
     await agentsPage.selectChooserType('Conversational');
     await agentsPage.cancelNewAgentChooser();

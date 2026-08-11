@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/authenticated.fixture';
 import { ConnectorsPage } from '../../pages/ConnectorsPage';
 
-test.describe('Connector discovery', () => {
+test.describe('Connector discovery @functional', () => {
   test('discovers visible connectors dynamically @smoke @regression', async ({
     page,
   }, testInfo) => {

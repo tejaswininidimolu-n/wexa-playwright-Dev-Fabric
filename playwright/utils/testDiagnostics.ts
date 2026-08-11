@@ -15,6 +15,10 @@ export async function attachPageDiagnostics(
       .locator('main')
       .innerText({ timeout: 5_000 })
       .catch(() => '<main unavailable>'),
+    mainDom: await page
+      .locator('main')
+      .innerHTML({ timeout: 5_000 })
+      .catch(() => '<main unavailable>'),
   };
   await testInfo.attach(`${feature}-diagnostics`, {
     body: JSON.stringify(diagnostics, null, 2),

@@ -7,7 +7,7 @@ const applicationUrl = getFabricBaseUrl();
 const loginEndpoint = new URL('/identity-api/users/login', applicationUrl).toString();
 const signupEndpoint = new URL('/identity-api/users/signup', applicationUrl).toString();
 
-test.describe('Authentication API @regression', () => {
+test.describe('Authentication API @api @regression', () => {
   test('rejects invalid login credentials', async ({ request }) => {
     const response = await request.post(loginEndpoint, {
       data: {

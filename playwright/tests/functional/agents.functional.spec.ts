@@ -16,7 +16,7 @@ test.describe('Safe Agent functional @functional', () => {
     expect(runtimeName.trim()).not.toBe('');
 
     const agentsPage = new AgentsPage(page);
-    await agentsPage.waitForReady();
+    await agentsPage.goto();
     await agentsPage.search(runtimeName);
     const matches = agentsPage.getAgentCardByName(runtimeName);
     await expect(matches.first()).toBeVisible({ timeout: 30_000 });

@@ -16,7 +16,7 @@ interface ConnectorReadOnlyResult {
   readonly failures: string[];
 }
 
-test.describe('Safe read-only connector capabilities', () => {
+test.describe('Safe read-only connector capabilities @functional', () => {
   test('executes only approved read-only capabilities @regression', async ({
     page,
   }, testInfo) => {

@@ -2,11 +2,13 @@ import { test, expect } from '../../fixtures/authenticated.fixture';
 import { ConnectorDetailsPage } from '../../pages/ConnectorDetailsPage';
 import { ConnectorsPage } from '../../pages/ConnectorsPage';
 
-test.describe('Connector details', () => {
+test.describe('Connector details @functional', () => {
   test('validates every discovered connector details modal @regression', async ({
     page,
   }, testInfo) => {
-    test.setTimeout(120_000);
+    // Exhaustively reopening 11 connector dialogs is API-bound and exceeds the
+    // default budget when this spec shares the dev environment with other workers.
+    test.setTimeout(300_000);
 
     const connectorsPage = new ConnectorsPage(page);
     const detailsPage = new ConnectorDetailsPage(page);
@@ -21,9 +23,10 @@ test.describe('Connector details', () => {
       'Connectors page loaded, but no connector cards were rendered.',
     ).toBeGreaterThan(0);
 
-    for (const connector of connectors) {
+    for (const [index, connector] of connectors.entries()) {
       try {
         await test.step(`Validate connector: ${connector.name}`, async () => {
+          if (index > 0) await connectorsPage.reloadList();
           expect(connector.name.trim(), 'Connector card name must not be empty.').not
             .toBe('');
           expect(
@@ -53,16 +56,14 @@ test.describe('Connector details', () => {
             console.log(`${connector.name}: no attachable event triggers`);
           }
 
-          await detailsPage.goBackToConnectors();
           validatedCount += 1;
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         failures.push(`${connector.name}: ${message}`);
 
-        await testInfo.attach(
-          `connector-details-${connector.name}-diagnostics`,
-          {
+        if (!page.isClosed()) {
+          await testInfo.attach(`connector-details-${connector.name}-diagnostics`, {
             body: JSON.stringify(
               {
                 connector: connector.name,
@@ -76,17 +77,20 @@ test.describe('Connector details', () => {
               2,
             ),
             contentType: 'application/json',
-          },
-        );
-        await testInfo.attach(`connector-details-${connector.name}-screenshot`, {
-          body: await page.screenshot({ fullPage: true }),
-          contentType: 'image/png',
-        });
+          });
+          const screenshot = await page.screenshot({ fullPage: true }).catch(() => undefined);
+          if (screenshot) {
+            await testInfo.attach(`connector-details-${connector.name}-screenshot`, {
+              body: screenshot,
+              contentType: 'image/png',
+            });
+          }
+        }
 
-        if (await detailsPage.isOpen().catch(() => false)) {
+        if (!page.isClosed() && await detailsPage.isOpen().catch(() => false)) {
           await detailsPage.goBackToConnectors().catch(() => undefined);
         }
-        if (!page.url().match(/\/connect\/connectors\/?$/)) {
+        if (!page.isClosed() && !page.url().match(/\/connect\/connectors\/?$/)) {
           await connectorsPage.goto().catch(() => undefined);
         }
       }

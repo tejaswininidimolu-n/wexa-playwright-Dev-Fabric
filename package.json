@@ -6,7 +6,7 @@
   "scripts": {
     "test": "playwright test --grep-invert @stateful",
     "test:smoke": "playwright test --grep @smoke --grep-invert @stateful",
-    "test:functional": "playwright test playwright/tests/functional --grep-invert @stateful --pass-with-no-tests",
+    "test:functional": "playwright test --grep @functional --grep-invert @stateful",
     "test:regression": "playwright test --grep @regression --grep-invert @stateful",
     "test:e2e": "playwright test playwright/tests/e2e --grep-invert @stateful --pass-with-no-tests",
     "test:api": "playwright test playwright/tests/api",

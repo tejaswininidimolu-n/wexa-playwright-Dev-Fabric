@@ -29,7 +29,7 @@ export class AgentApi {
     const agentRequest = page.waitForRequest((candidate) =>
       new URL(candidate.url()).pathname === AGENT_LIST_PATH,
     );
-    await page.goto('/orchestrate/agents');
+    await page.goto('/orchestrate/process-flows');
     const capturedRequest = await agentRequest;
     const authorization = capturedRequest.headers().authorization;
     const projectId = new URL(capturedRequest.url()).searchParams.get('projectID');
@@ -54,12 +54,34 @@ export class AgentApi {
     return response.json() as Promise<AgentListResponse>;
   }
 
+  async getFlowsResponse(): Promise<APIResponse> {
+    return this.get(`${this.withProject(AGENT_LIST_PATH)}&kind=flow`);
+  }
+
+  async getFlows(): Promise<AgentListResponse> {
+    const response = await this.getFlowsResponse();
+    expect(response.status()).toBe(200);
+    return response.json() as Promise<AgentListResponse>;
+  }
+
   async getAgentResponse(id: string): Promise<APIResponse> {
     return this.get(`/data-api/agentflow/${encodeURIComponent(id)}`);
   }
 
   async getAgent(id: string): Promise<AgentDetail> {
     const response = await this.getAgentResponse(id);
+    expect(response.status()).toBe(200);
+    return response.json() as Promise<AgentDetail>;
+  }
+
+  async getFlowResponse(id: string): Promise<APIResponse> {
+    return this.get(
+      `${AGENT_LIST_PATH.slice(0, -1)}/${encodeURIComponent(id)}?projectId=${encodeURIComponent(this.projectId)}`,
+    );
+  }
+
+  async getFlow(id: string): Promise<AgentDetail> {
+    const response = await this.getFlowResponse(id);
     expect(response.status()).toBe(200);
     return response.json() as Promise<AgentDetail>;
   }

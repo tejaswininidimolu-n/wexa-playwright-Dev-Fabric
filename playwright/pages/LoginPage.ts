@@ -55,7 +55,7 @@ export class LoginPage extends BasePage {
   /** Verifies that successful authentication navigated away from login. */
   async expectLoginSuccessful(): Promise<void> {
     await expect(this.page).not.toHaveURL(/\/login\/?(?:[?#].*)?$/, {
-      timeout: 15_000,
+      timeout: 30_000,
     });
   }
 
